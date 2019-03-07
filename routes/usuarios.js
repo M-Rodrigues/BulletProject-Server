@@ -7,7 +7,7 @@ const router = new Router()
 module.exports = router
 
 router.get('/', async (req, res, next) => {
-    const result = await db.query('SELECT * FROM teste', [])
+    const result = await db.query('SELECT * FROM usuarios', [])
     console.log(result)
     res.send(result);
 })
