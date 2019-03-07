@@ -1,0 +1,19 @@
+{
+  "name": "bullet-journal-server",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "author": "",
+  "license": "ISC",
+  "dependencies": {
+    "bcrypt": "^3.0.4",
+    "body-parser": "^1.18.3",
+    "express": "^4.16.4",
+    "express-promise-router": "^3.0.3",
+    "jsonwebtoken": "^8.5.0",
+    "pg": "^7.8.1"
+  }
+}
