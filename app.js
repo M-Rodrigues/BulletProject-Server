@@ -11,7 +11,7 @@ app.use((req, res, next) => {               // MIDDLEWARE DE LOGS
     console.log(`${req.method} ${req.url} recieved at : ${time}`)
     next();
 })
-app.use((req, res, next) => {          // MIDDLEWARE PARA CORS
+app.use((req, res, next) => {               // MIDDLEWARE PARA CORS
     res.header("Access-Control-Allow-Origin", "*");
     res.header("Access-Control-Allow-Methods", "PUT, GET, OPTIONS, POST, PATCH, DELETE")
     res.header("Access-Control-Allow-Headers", "Origin, X-Requested-With, Content-Type, Accept");
