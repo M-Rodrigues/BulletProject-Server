@@ -28,6 +28,7 @@ app.listen(PORT, () => {                    // SERVIDOR EM MODO LISTEN
 app.get('/', (req, res) => {                // ROOT ENDPOINT
     let obj = {
         message: "Welcome to Bullet Journal API!",
+        team: "Grupo R",
         date: Date.now()
     };
     res.send(obj);
