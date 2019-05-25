@@ -6,18 +6,28 @@ const db = require('../db')
 const router = new Router()
 module.exports = router
 
+/*  GET /usuarios
+    ::  consulta todos os usuário cadastrados no sistema
+    */
 router.get('/', async (req, res, next) => {
     const result = await db.query('select * from usuarios', [])
     // console.log(result)
     res.send(result);
 })
 
+/*  GET /usuarios/:id
+    ::  consulta apenas 1 usuario especifico pelo seu cod_usuario
+    */
 router.get('/:id', async (req, res, next) => {
     const result = await db.query('select * from usuarios where cod_usuario = $1', [parseInt(req.params.id)])
     // console.log(result)
     res.send(result[0]);
 })
 
+/*  POST /usuarios
+    ::  criar um novo usuario no sistema, ou seja
+        , realiza o cadastro no sistema
+    */
 router.post('/', async (req, res, next) => {
     try {
         const hashPsw = await bcrypt.hash(req.body.password, cred.saltRounds); // Criptografa senha
@@ -40,6 +50,9 @@ router.post('/', async (req, res, next) => {
     }
 })
 
+/*  DELETE /usuarios/:id
+    ::  remove o cadastro de um usuário pelo seu cod_usuario
+    */
 router.delete('/:id', async (req, res, next) => {
     try {
         console.log(req.params);

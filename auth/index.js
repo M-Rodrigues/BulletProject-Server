@@ -3,22 +3,34 @@ const cred = require('../credentials')
 
 module.exports = {
     authenticate: (req, res, next) => {
-        let token = req.headers.token;
-        console.log(req.headers)
-        console.log(req.headers.authorization);
-        
+        let token = req.headers.authorization;
+        // console.log(req.headers)
+        // console.log(req.headers.authorization);
+
         if (token) { // verify token
             jwt.verify(token, cred.jwtSecret, (err, decoded) => {
                 if (err) {
-                    console.log("error: ")
-                    console.log(err)
-                    res.status(401).send(err); // Token Expirou
+                    res.send({
+                        msg: 'Token expirou',
+                        error: err,
+                        status: -1
+                    }) // Token Expirou
                 } else {
-                    next(); // Autenticado
+                    // res.send({
+                    //     msg: 'Token verificado com sucesso',
+                    //     decoded: decoded
+                    // }) // Autenticado
+
+                    req.body.jwt_payload = decoded.data
+                    console.log("Request authenticated")
+                    next()
                 }
             })
         } else {
-            res.status(401).send('Authenticate yourself first!'); // request sem token
+            res.send({
+                msg: 'Requisição sem token...',
+                status: -2
+            })        
         }
     }
 }

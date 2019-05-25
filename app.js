@@ -35,30 +35,20 @@ app.get('/', (req, res) => {                // ROOT ENDPOINT
 })
 
 
-app.get('/teste', (req, res) => {                // ROOT ENDPOINT
-    let token = req.headers.token;
-    console.log(req.headers)
-    console.log(req.headers.authorization);
-    
-    if (token) { // verify token
-        jwt.verify(token, cred.jwtSecret, (err, decoded) => {
-            if (err) {
-                res.send({
-                    msg: 'Token expirou',
-                    error: err
-                }) // Token Expirou
-            } else {
-                res.send({
-                    msg: 'Token verificado com sucesso',
-                    decoded: decoded
-                }) // Autenticado
-            }
-        })
-    } else {
-        res.send({
-            msg: 'Requisição sem token...'
-        })        
-    }
+const jwt = require('jsonwebtoken')
+const cred = require('./credentials')
+const auth = require('./auth')
+app.get('/teste', auth.authenticate, (req, res) => {           
+// app.get('/teste', (req, res) => {           
+    console.log(req.body)
 
-    res.send(obj);
+    var teste_token = jwt.sign(
+        { data: 'my payload' },
+        cred.jwtSecret,
+        { expiresIn: cred.jwtExpiresIn }
+    );
+
+    console.log(`teste_token: ${teste_token}`);
+
+    res.send({token: teste_token})
 })
