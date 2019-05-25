@@ -47,8 +47,10 @@ app.get('/teste', auth.authenticate, (req, res) => {
         cred.jwtSecret,
         { expiresIn: cred.jwtExpiresIn }
     );
-
+    
     console.log(`teste_token: ${teste_token}`);
 
-    res.send({token: teste_token})
+    res.redirect(`/usuarios/${req.body.jwt_payload.cod_usuario}`)
+
+    // res.send({ msg:'Autenticado!', token: teste_token})
 })
