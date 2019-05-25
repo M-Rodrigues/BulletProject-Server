@@ -28,6 +28,8 @@ router.put('/login', async (req, res, next) => {        // Autentica um usuario
             { cod_usuario: user.cod_usuario }, 
             cred.jwtSecret, 
             { expiresIn: '10s' })
+
+        console.log(token)
         
         res.send({ status: 0, token: token })                              // Enviar token
 

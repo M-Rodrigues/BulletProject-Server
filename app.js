@@ -34,3 +34,31 @@ app.get('/', (req, res) => {                // ROOT ENDPOINT
     res.send(obj);
 })
 
+
+app.get('/teste', (req, res) => {                // ROOT ENDPOINT
+    let token = req.headers.token;
+    console.log(req.headers)
+    console.log(req.headers.authorization);
+    
+    if (token) { // verify token
+        jwt.verify(token, cred.jwtSecret, (err, decoded) => {
+            if (err) {
+                res.send({
+                    msg: 'Token expirou',
+                    error: err
+                }) // Token Expirou
+            } else {
+                res.send({
+                    msg: 'Token verificado com sucesso',
+                    decoded: decoded
+                }) // Autenticado
+            }
+        })
+    } else {
+        res.send({
+            msg: 'Requisição sem token...'
+        })        
+    }
+
+    res.send(obj);
+})

@@ -4,11 +4,14 @@ const cred = require('../credentials')
 module.exports = {
     authenticate: (req, res, next) => {
         let token = req.headers.token;
+        console.log(req.headers)
         console.log(req.headers.authorization);
         
         if (token) { // verify token
             jwt.verify(token, cred.jwtSecret, (err, decoded) => {
                 if (err) {
+                    console.log("error: ")
+                    console.log(err)
                     res.status(401).send(err); // Token Expirou
                 } else {
                     next(); // Autenticado
