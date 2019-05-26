@@ -1,24 +1,24 @@
 create table prioridade
 (
-    cod_prioridade serial not null primary key,
+    cod_prioridade int not null primary key,
     descricao varchar(50) not null 
 )
 
 create table status
 (
-    cod_status serial not null primary key,
+    cod_status int not null primary key,
     descricao varchar(50) not null 
 )
 
 create table tipo
 (
-    cod_tipo serial not null primary key,
+    cod_tipo int not null primary key,
     descricao varchar(50) not null 
 )
 
 create table colecoes
 (
-    cod_colecao serial not null primary key,
+    cod_colecao int not null primary key,
     descricao varchar(50) not null
 )
 
