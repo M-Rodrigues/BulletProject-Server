@@ -24,7 +24,7 @@ create table colecoes
 
 create table tempo
 (
-    cod_tempo int not null primary key,
+    cod_tempo serial not null primary key,
     dia int not null,
     mes int not null,
     ano int not null,

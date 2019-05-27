@@ -1,5 +1,5 @@
 ----- Tabela TEMPO -----
-COPY tempo(cod_tempo, dia, mes, ano, dia_semana, dia_semana_nome, mes_nome)
+COPY tempo(dia, mes, ano, dia_semana, dia_semana_nome, mes_nome)
 FROM '/home/rafael/Área de Trabalho/bujo-server_api/db/schema/tempo.csv' DELIMITER ';'
 
 ----- Tabela PRIORIDADE -----
