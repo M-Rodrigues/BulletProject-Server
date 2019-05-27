@@ -38,8 +38,22 @@ app.get('/', (req, res) => {                // ROOT ENDPOINT
 const jwt = require('jsonwebtoken')
 const cred = require('./credentials')
 const auth = require('./auth')
-app.get('/teste', auth.authenticate, (req, res) => {           
+
+app.get('/teste', (req, res) => {           
 // app.get('/teste', (req, res) => {           
+    console.log(req.body)
+
+    var teste_token = jwt.sign(
+        { data: 'my payload' },
+        cred.jwtSecret,
+        {}
+    );
+    
+    console.log(`teste_token: ${teste_token}`);
+    res.send({ msg:'Autenticado!', token: teste_token})
+})
+    
+app.get('/teste-auth', auth.authenticate, (req, res) => {           
     console.log(req.body)
 
     var teste_token = jwt.sign(
@@ -51,6 +65,4 @@ app.get('/teste', auth.authenticate, (req, res) => {
     console.log(`teste_token: ${teste_token}`);
 
     res.redirect(`/usuarios/${req.body.jwt_payload.cod_usuario}`)
-
-    // res.send({ msg:'Autenticado!', token: teste_token})
 })

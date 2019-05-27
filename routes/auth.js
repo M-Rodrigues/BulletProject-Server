@@ -14,7 +14,7 @@ router.put('/login', async (req, res, next) => {        // Autentica um usuario
         let psw = req.body.password;
         
         const result = await db.query(`                         
-            select * from usuarios where email = $1
+            select cod_usuario from usuarios where email = $1
         `,[req.body.email]);
         let user = result[0];                                   // Recuperar senha no banco
         

@@ -35,13 +35,30 @@ router.post('/', async (req, res, next) => {
 
         let user = req.body.user;                           // Cria novo usuario no banco
         const result = await db.query(
-            `insert into usuarios (nome, dia_nasc, mes_nasc, ano_nasc, email, resposta, senha)
-            values ($1, $2, $3, $4, $5, $6, $7)`
-            ,[user.nome, user.dia_nasc, user.mes_nasc, user.ano_nasc, user.email, hashAns, hashPsw]);
+            `insert into usuarios (nome, email, resposta, senha)
+            values ($1, $2, $3, $4)`
+            ,[user.nome, user.email, hashAns, hashPsw]);
 
         console.log(result);
 
         if (result.erro) throw result.erro;
+        
+        // Atualiza data de nasc
+        const result2 = await db.query(`                      
+            update usuarios
+            set
+                cod_tempo_nasc = t.cod_tempo
+            from
+                tempo as t
+            where
+                email = $1
+                and t.dia = $2
+                and t.mes = $3
+                and t.ano = $4
+            
+        `,[user.email, user.dia_nasc, user.mes_nasc, user.ano_nasc]);
+
+        if (result2.erro) throw result2.erro;
 
         res.send({message: 'sucesso'});
     } catch (err) {

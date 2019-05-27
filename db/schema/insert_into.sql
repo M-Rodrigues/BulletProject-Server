@@ -13,3 +13,5 @@ FROM '/home/rafael/Área de Trabalho/bujo-server_api/db/schema/tempo.csv' DELIMI
 ----- Tabela USUARIOS -----
 
 ----- Tabela ENTRADAS -----
+
+insert into tempo(dia, mes, ano, dia_semana, dia_semana_nome, mes_nome) values
