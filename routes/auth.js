@@ -9,17 +9,20 @@ const test = '$2b$05$p46H1Df8oLH9BTSK0Ubx4eUREbcutpbrXGCwjKn05.JV27mxitqEi'
 
 module.exports = router
 
+/*  PUT /auth/login
+    ::  realiza login, retornando token de identificação
+    */
 router.put('/login', async (req, res, next) => {        // Autentica um usuario
     try {
         let psw = req.body.password;
         
         const result = await db.query(`                         
-            select cod_usuario from usuarios where email = $1
+            select cod_usuario, senha from usuarios where email = $1
         `,[req.body.email]);
         let user = result[0];                                   // Recuperar senha no banco
         
         if (!user) throw {status: 1, msg: "email não cadastrado"}          // ERRO: Email não cadastrado
-
+        
         const match = await bcrypt.compare(psw, user.senha)     // Comparar as duas senhas
         
         if (!match) throw {status: 2, msg: "Senha errada"};                // ERRO: Senha não confere
@@ -28,8 +31,8 @@ router.put('/login', async (req, res, next) => {        // Autentica um usuario
             { cod_usuario: user.cod_usuario }, 
             cred.jwtSecret, 
             { expiresIn: cred.jwtExpiresIn })
-
-        console.log(token)
+            
+        // console.log(token)
         
         res.send({ status: 0, token: token })                              // Enviar token
 
@@ -38,6 +41,9 @@ router.put('/login', async (req, res, next) => {        // Autentica um usuario
     }
 })
 
+/*  PUT /auth/recover
+    ::  realiza troca de senha, caso necessário
+    */
 router.put('/recover', async (req, res, next) => {      // Troca senha sem estar logado
     try {
         const result = await db.query(`                            
