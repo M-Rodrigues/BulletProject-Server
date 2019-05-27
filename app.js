@@ -39,8 +39,10 @@ const jwt = require('jsonwebtoken')
 const cred = require('./credentials')
 const auth = require('./auth')
 
+/*  GET /teste
+    ::  retorna um token sem tempo de expiração
+    */
 app.get('/teste', (req, res) => {           
-// app.get('/teste', (req, res) => {           
     console.log(req.body)
 
     var teste_token = jwt.sign(
@@ -52,7 +54,10 @@ app.get('/teste', (req, res) => {
     console.log(`teste_token: ${teste_token}`);
     res.send({ msg:'Autenticado!', token: teste_token})
 })
-    
+
+/*  GET /teste-auth
+    ::  verifica o mecanismo de autenticação
+    */
 app.get('/teste-auth', auth.authenticate, (req, res) => {           
     console.log(req.body)
 
@@ -63,6 +68,6 @@ app.get('/teste-auth', auth.authenticate, (req, res) => {
     );
     
     console.log(`teste_token: ${teste_token}`);
-
-    res.redirect(`/usuarios/${req.body.jwt_payload.cod_usuario}`)
+    // res.redirect(`/usuarios/${req.body.jwt_payload.cod_usuario}`)
+    res.send({status: 'Autenticado!!'})
 })

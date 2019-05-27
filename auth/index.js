@@ -21,9 +21,9 @@ module.exports = {
                     //     decoded: decoded
                     // }) // Autenticado
 
-                    console.log(decoded)
+                    // console.log(decoded)
                     req.body.jwt_payload = decoded
-                    console.log("Request authenticated")
+                    // console.log("Request authenticated")
                     next()
                 }
             })

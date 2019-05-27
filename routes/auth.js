@@ -30,7 +30,8 @@ router.put('/login', async (req, res, next) => {        // Autentica um usuario
         const token = await jwt.sign(                           // Gerar novo token
             { cod_usuario: user.cod_usuario }, 
             cred.jwtSecret, 
-            { expiresIn: cred.jwtExpiresIn })
+            // { expiresIn: cred.jwtExpiresIn })
+            { expiresIn: '1 days' })
             
         // console.log(token)
         

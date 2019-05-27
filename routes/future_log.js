@@ -16,14 +16,15 @@ module.exports = router
     ::  consulta todas entradas de FL de um usuário
     */
 router.get('/', auth.authenticate, async (req, res, next) => {
-    const result = await db.query(`
-        select  * 
-        from entradas
-        where cod_colecao = $1 and cod_usuario = $2`
-    , [cod_fl, req.body.payload.cod_usuario])
+    // const result = await db.query(`
+    //     select  * 
+    //     from entradas
+    //     where cod_colecao = $1 and cod_usuario = $2`
+    // , [cod_fl, req.body.payload.cod_usuario])
 
-    console.log(result)
-    res.send(result);
+    // console.log(result)
+    // res.send(result);
+    res.send({status: 0, msg: 'GET /future-log'})
 })
 
 // TODO
@@ -48,14 +49,67 @@ router.post('/', auth.authenticate, async (req, res, next) => {
     try {
         console.log(req.body);
 
-        const result = await db.query(
+        let data_entr = build_data(req.body.data.dia, req.body.data.mes, req.body.data.ano)
+        console.log(data_entr)
+        
+        // Cria entrada
+        await db.query(
             `insert into entradas 
-            (descricao, cod_prioridade, cod_tipo, cod_colecao, cod_status, cod_usuario) values
-            ($1, $2, $3, 2, 1)`
-            ,[req.body.descricao, req.body.signifier, req.body.tipo, cod_fl, req.body.status, req.body.payload.cod_usuario]);
+            (
+                descricao, 
+                cod_prioridade, 
+                cod_tipo, 
+                cod_status, 
+                cod_colecao, 
+                cod_usuario,
+                data
+            ) values
+            ($1, $2, $3, $4, $5, $6, $7)`
+            ,[
+                req.body.descricao,
+                req.body.signifier,
+                req.body.tipo,
+                1, 
+                cod_fl, 
+                req.body.jwt_payload.cod_usuario,
+                data_entr
+            ]);
+        
+        // Atualiza cod_tempo
+        await db.query(`
+            update entradas
+            set cod_tempo = t.cod_tempo
+            from tempo as t
+            where
+                descricao = $1
+                and cod_colecao = $2
+                and cod_usuario = $3
+                and data = $4
+        `,[
+            req.body.descricao,
+            cod_fl, 
+            req.body.jwt_payload.cod_usuario,
+            data_entr
+        ]);
 
-        console.log(result);
-        res.send({status: 0, res: result});        
+        // Busca cod_entrada
+        const result = await db.query(`
+            select *
+            from entradas
+            where
+                descricao = $1
+                and cod_colecao = $2
+                and cod_usuario = $3
+                and data = $4
+        `,[
+            req.body.descricao,
+            cod_fl, 
+            req.body.jwt_payload.cod_usuario,
+            data_entr
+        ]);
+
+        console.log(result[0]);
+        res.send({status: 0, res: result});
     } catch (err) {
         console.log(err);
         res.send(err);
@@ -91,7 +145,7 @@ router.put('/', auth.authenticate, async (req, res, next) => {
 
         if (result.erro) throw {err: result.erro, status: 1};
 
-        res.send({msg: 'sucesso', status = 0});
+        res.send({msg: 'sucesso', status: 0});
     } catch (err) {
         console.log(err);
         res.send(err);
@@ -118,3 +172,22 @@ router.delete('/:id', auth.authenticate, async (req, res, next) => {
         res.send(err);
     }
 })
+
+
+
+const build_data = (dia, mes, ano) => {
+    let data = ""
+    
+    if (!dia) data += "00"
+    else if (dia < 10) data += "0" + dia
+    else data += dia
+
+    if (!mes) data += "00"
+    else if (mes < 10) data += "0" + mes
+    else data += mes
+
+    if (!ano) data = data + "0000"
+    else data += ano
+
+    return data
+}
