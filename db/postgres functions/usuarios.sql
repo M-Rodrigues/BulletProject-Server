@@ -1,7 +1,6 @@
 /*  GET /usuarios
     ::  consulta todos os usuário cadastrados no sistema
     */
-
 CREATE OR REPLACE 
 FUNCTION public.us_consulta_usuarios()
     RETURNS SETOF json
