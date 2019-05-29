@@ -31,11 +31,11 @@ router.get('/:month/:year', auth.authenticate, async (req, res, next) => {
         let year = req.params.year
 
         const result = await db.query(`
-            select tp_get_entradas_by_monthyear($1,$2,$3)
+            select fl_get_entradas_by_monthyear($1,$2,$3)
         `, [parseInt(month), parseInt(year), req.body.jwt_payload.cod_usuario])
         
         console.log(result)
-        res.send(result[0].tp_get_entradas_by_monthyear);
+        res.send({ status: 0, data: result[0].fl_get_entradas_by_monthyear });
     } catch(err) {
         res.send({status: 1, erro: err})
     }
@@ -48,7 +48,7 @@ router.put('/', auth.authenticate, async (req, res, next) => {
     try {
         // atualiza dados de uma entrada
         const result = await db.query(`
-            select tp_atualiza_entrada($1,$2,$3,$4)
+            select fl_atualiza_entrada($1,$2,$3,$4)
         `,[
             req.body.cod_entrada, 
             req.body.descricao, 
@@ -59,10 +59,10 @@ router.put('/', auth.authenticate, async (req, res, next) => {
         // console.log(result)
         if (result.erro) throw result.erro;
 
-        res.send({ entrada: result[0].tp_atualiza_entrada, status: 0 });
+        res.send({ status: 0, data: result[0].fl_atualiza_entrada, status: 0 });
     } catch (err) {
         console.log(err);
-        res.send(err);
+        res.send({ status: 1, erro:err });
     }
 })
 
@@ -77,13 +77,13 @@ router.post('/', auth.authenticate, async (req, res, next) => {
 
         // Cria nova entrada no banco
         const result = await db.query(`
-            select tp_criar_entrada($1,$2,$3,$4,$5,$6)
+            select fl_criar_entrada($1,$2,$3,$4,$5,$6)
         `,[req.body.descricao, req.body.dia, req.body.mes, req.body.ano, data, req.body.jwt_payload.cod_usuario]);
 
         // console.log(result)
         if (result.erro) throw result.erro;
 
-        res.send({ entrada: result[0].tp_criar_entrada, status: 0 });
+        res.send({ entrada: result[0].fl_criar_entrada, status: 0 });
     } catch (err) {
         console.log(err);
         res.send(err);
@@ -97,14 +97,14 @@ router.delete('/:id', auth.authenticate, async (req, res, next) => {
     try {
         console.log(req.params);
         const result = await db.query(
-            `select tp_remover_entrada($1)`
+            `select fl_remover_entrada($1)`
             ,[parseInt(req.params.id)]);
 
         if (result.erro) throw result.erro;
 
-        res.send({message: 'sucesso'});
+        res.send({staus: 0, message: 'sucesso'});
     } catch (err) {
         console.log(err);
-        res.send(err);
+        res.send({status: 1, erro:err });
     }
 })
