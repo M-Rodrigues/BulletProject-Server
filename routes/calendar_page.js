@@ -32,12 +32,11 @@ router.put('/', auth.authenticate, async (req, res, next) => {
     try {
         // atualiza dados de uma entrada
         const result = await db.query(`
-            select cp_atualiza_entrada($1,$2,$3,$4)
+            select cp_atualiza_entrada($1,$2,$3)
         `,[
             req.body.cod_entrada, 
             req.body.descricao, 
-            req.body.cod_prioridade,
-            req.body.cod_status
+            req.body.cod_prioridade
         ]);
 
         // console.log(result)
@@ -61,13 +60,13 @@ router.post('/', auth.authenticate, async (req, res, next) => {
 
         // Cria nova entrada no banco
         const result = await db.query(`
-            select tp_criar_entrada($1,$2,$3,$4,$5,$6)
+            select cp_criar_entrada($1,$2,$3,$4,$5,$6)
         `,[req.body.descricao, req.body.dia, req.body.mes, req.body.ano, data, req.body.jwt_payload.cod_usuario]);
 
         // console.log(result)
         if (result.erro) throw result.erro;
 
-        res.send({ entrada: result[0].tp_criar_entrada, status: 0 });
+        res.send({ entrada: result[0].cp_criar_entrada, status: 0 });
     } catch (err) {
         console.log(err);
         res.send(err);
@@ -81,7 +80,7 @@ router.delete('/:id', auth.authenticate, async (req, res, next) => {
     try {
         console.log(req.params);
         const result = await db.query(
-            `select tp_remover_entrada($1)`
+            `select cp_remover_entrada($1)`
             ,[parseInt(req.params.id)]);
 
         if (result.erro) throw result.erro;
