@@ -20,11 +20,13 @@ BEGIN
     nome_mes := (select mes_nome from tempo where cod_tempo = min_cod);
 
     return query
-        select row_to_json(e) from (
+        select array_to_json(array_agg(row_to_json(e))) from (
             select
+                t.dia as dia,
                 e_mes as mes,
                 e_ano as ano,
                 nome_mes as nome_mes,
+                dia_semana_nome as dia_semana_nome,
                 (
                     select  array_to_json(array_agg(row_to_json(e))) from (
                         select *
@@ -33,10 +35,15 @@ BEGIN
                         where
                             cod_tempo >= min_cod
                             and cod_tempo <= max_cod
+                            and cod_tempo = t.cod_tempo
                             and cod_usuario = e_cod_usuario
                             and cod_colecao = 7
                     ) as e
                 ) as entradas
+            from tempo as t
+            where
+                t.cod_tempo >= min_cod
+                and t.cod_tempo <= max_cod
         ) as e;
 END
 $BODY$;

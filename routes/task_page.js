@@ -19,9 +19,9 @@ router.get('/:month/:year', auth.authenticate, async (req, res, next) => {
         `, [parseInt(month), parseInt(year), req.body.jwt_payload.cod_usuario])
         
         console.log(result)
-        res.send(result[0].tp_get_entradas_by_monthyear);
+        res.send({ data: result[0].tp_get_entradas_by_monthyear, status: 0 });
     } catch(err) {
-        res.send({status: 1, erro: err})
+        res.send({ status: 1, erro: err })
     }
 })
 
@@ -43,10 +43,10 @@ router.put('/', auth.authenticate, async (req, res, next) => {
         // console.log(result)
         if (result.erro) throw result.erro;
 
-        res.send({ entrada: result[0].tp_atualiza_entrada, status: 0 });
+        res.send({ data: result[0].tp_atualiza_entrada, status: 0 });
     } catch (err) {
         console.log(err);
-        res.send(err);
+        res.send({ status: 1, erro: err });
     }
 })
 
@@ -67,10 +67,10 @@ router.post('/', auth.authenticate, async (req, res, next) => {
         // console.log(result)
         if (result.erro) throw result.erro;
 
-        res.send({ entrada: result[0].tp_criar_entrada, status: 0 });
+        res.send({ data: result[0].tp_criar_entrada, status: 0 });
     } catch (err) {
         console.log(err);
-        res.send(err);
+        res.send({ status:1, erro:err });
     }
 })
 
@@ -86,9 +86,9 @@ router.delete('/:id', auth.authenticate, async (req, res, next) => {
 
         if (result.erro) throw result.erro;
 
-        res.send({message: 'sucesso'});
+        res.send({status: 0, message: 'sucesso'});
     } catch (err) {
         console.log(err);
-        res.send(err);
+        res.send({ status: 1, erro:err });
     }
 })

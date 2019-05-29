@@ -3,171 +3,106 @@ const db = require('../db')
 const auth = require('../auth')
 const utils = require('../utils')
 
-/* cod_colecao do Future Log no DB
-    */
-const cod_fl = 3
-
 const router = new Router()
 module.exports = router
 
-// TODAS REQUESTS DEVEM ESTAR NO FORMATO JSON
-
-// TODO
-/*  GET /future-log
-    ::  consulta todas entradas de FL de um usuário
+/*  GET /future-log/full-year
+    ::  consulta todas entradas de future log dos próximos 12 meses
     */
-router.get('/', auth.authenticate, async (req, res, next) => {
-    // const result = await db.query(`
-    //     select  * 
-    //     from entradas
-    //     where cod_colecao = $1 and cod_usuario = $2`
-    // , [cod_fl, req.body.payload.cod_usuario])
-
-    // console.log(result)
-    // res.send(result);
-    res.send({status: 0, msg: 'GET /future-log'})
-})
-
-// TODO
-/*  GET /future-log/:id
-    ::  consulta uma entrada de FL de um usuário
-    */
-router.get('/:id', auth.authenticate, async (req, res, next) => {
-    const result = await db.query(`
-        select *
-        from entradas
-        where cod_entrada = $1
-    `, [parseInt(req.params.id)])
-    console.log(result)
-    res.send(result[0]);
-})
-
-// TODO
-/*  POST /future-log
-    ::  cria uma nova entrada no FL de um usuário
-    */
-router.post('/', auth.authenticate, async (req, res, next) => {
+router.get('full-year', auth.authenticate, async (req, res, next) => {
     try {
-        console.log(req.body);
-
-        let data_entr = utils.build_data(req.body.data.dia, req.body.data.mes, req.body.data.ano)
-        console.log(data_entr)
-        
-        // Cria entrada
-        await db.query(
-            `insert into entradas 
-            (
-                descricao, 
-                cod_prioridade, 
-                cod_tipo, 
-                cod_status, 
-                cod_colecao, 
-                cod_usuario,
-                data
-            ) values
-            ($1, $2, $3, $4, $5, $6, $7)`
-            ,[
-                req.body.descricao,
-                req.body.signifier,
-                req.body.tipo,
-                1, 
-                cod_fl, 
-                req.body.jwt_payload.cod_usuario,
-                data_entr
-            ]);
-        
-        // Atualiza cod_tempo
-        await db.query(`
-            update entradas
-            set cod_tempo = t.cod_tempo
-            from tempo as t
-            where
-                descricao = $1
-                and cod_colecao = $2
-                and cod_usuario = $3
-                and data = $4
-        `,[
-            req.body.descricao,
-            cod_fl, 
-            req.body.jwt_payload.cod_usuario,
-            data_entr
-        ]);
-
-        // Busca cod_entrada
         const result = await db.query(`
-            select *
-            from entradas
-            where
-                descricao = $1
-                and cod_colecao = $2
-                and cod_usuario = $3
-                and data = $4
-        `,[
-            req.body.descricao,
-            cod_fl, 
-            req.body.jwt_payload.cod_usuario,
-            data_entr
-        ]);
-
-        console.log(result[0]);
-        res.send({status: 0, res: result});
-    } catch (err) {
-        console.log(err);
-        res.send(err);
+            select fl_get_entradas_next_year($1,$2,$3)
+        `, [parseInt(month), parseInt(year), req.body.jwt_payload.cod_usuario])
+        
+        console.log(result)
+        res.send({ data: result[0].fl_get_entradas_next_year, status: 0 });
+    } catch(err) {
+        res.send({status: 1, erro: err})
     }
 })
 
-// TODO
+/*  GET /future-log/:month/:year
+    ::  consulta todas entradas de future log referentes a month/year
+    */
+router.get('/:month/:year', auth.authenticate, async (req, res, next) => {
+    try {
+        let month = req.params.month
+        let year = req.params.year
+
+        const result = await db.query(`
+            select tp_get_entradas_by_monthyear($1,$2,$3)
+        `, [parseInt(month), parseInt(year), req.body.jwt_payload.cod_usuario])
+        
+        console.log(result)
+        res.send(result[0].tp_get_entradas_by_monthyear);
+    } catch(err) {
+        res.send({status: 1, erro: err})
+    }
+})
+
 /*  PUT /future-log
-    ::  atualiza dados de uma entrada de FL de um usuário
+    ::  atualiza dados de uma entrada do future log
     */
 router.put('/', auth.authenticate, async (req, res, next) => {
     try {
-        console.log(req.body)
-        let obj = req.body
+        // atualiza dados de uma entrada
         const result = await db.query(`
-            update entradas
-            set
-                descricao = $1,
-                cod_tempo = $2,
-                cod_usuario = $3,
-                cod_prioridade = $4,
-                cod_status = $5,
-                cod_tipo = $6,
-                cod_colecao = $7,
-                cod_entrada_parent = $8
-            where cod_entrada = $9
+            select tp_atualiza_entrada($1,$2,$3,$4)
         `,[
-            obj.descricao, obj.cod_tempo, obj.payload.cod_usuario, obj.cod_prioridade,
-            obj.cod_status, obj.cod_tipo, cod_fl, obj.cod_entrada_parent
+            req.body.cod_entrada, 
+            req.body.descricao, 
+            req.body.cod_prioridade,
+            req.body.cod_status
         ]);
 
-        console.log(result);
+        // console.log(result)
+        if (result.erro) throw result.erro;
 
-        if (result.erro) throw {err: result.erro, status: 1};
-
-        res.send({msg: 'sucesso', status: 0});
+        res.send({ entrada: result[0].tp_atualiza_entrada, status: 0 });
     } catch (err) {
         console.log(err);
         res.send(err);
     }
 })
 
-// TODO
+/*  POST /future-log
+    ::  criar uma nova entrada no future log
+    */
+router.post('/', auth.authenticate, async (req, res, next) => {
+    try {
+        let data = utils.build_data(req.body.dia, req.body.mes, req.body.ano)
+
+        console.log(data)
+
+        // Cria nova entrada no banco
+        const result = await db.query(`
+            select tp_criar_entrada($1,$2,$3,$4,$5,$6)
+        `,[req.body.descricao, req.body.dia, req.body.mes, req.body.ano, data, req.body.jwt_payload.cod_usuario]);
+
+        // console.log(result)
+        if (result.erro) throw result.erro;
+
+        res.send({ entrada: result[0].tp_criar_entrada, status: 0 });
+    } catch (err) {
+        console.log(err);
+        res.send(err);
+    }
+})
+
 /*  DELETE /future-log/:id
-    ::  Remove uma entrada do FL de um usuario
+    ::  remove o uma entrada do future log
     */
 router.delete('/:id', auth.authenticate, async (req, res, next) => {
     try {
+        console.log(req.params);
         const result = await db.query(
-            `delete from entradas where cod_entrada = $1`
+            `select tp_remover_entrada($1)`
             ,[parseInt(req.params.id)]);
 
-        console.log(result);
+        if (result.erro) throw result.erro;
 
-        if (result.erro) throw {err: result.erro, status:1}
-
-        res.send({msg: 'sucesso', status: 0});
+        res.send({message: 'sucesso'});
     } catch (err) {
         console.log(err);
         res.send(err);
