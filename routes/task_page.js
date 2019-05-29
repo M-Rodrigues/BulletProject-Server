@@ -28,12 +28,12 @@ router.get('/:month/:year', auth.authenticate, async (req, res, next) => {
     try {
         let month = req.params.month
         let year = req.params.year
-        let monthYear = utils.build_data(0,month,year).substring(2,8)
 
         const result = await db.query(`
-            select tp_get_entradas_by_monthyear($1,$2)
-        `, [parseInt(monthYear, req.body.jwt_payload.cod_usuario)])
+            select tp_get_entradas_by_monthyear($1,$2,$3)
+        `, [parseInt(month), parseInt(year), req.body.jwt_payload.cod_usuario])
         
+        console.log(result)
         res.send(result[0].tp_get_entradas_by_monthyear);
     } catch(err) {
         res.send({status: 1, erro: err})

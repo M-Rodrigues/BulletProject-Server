@@ -3,37 +3,52 @@
     */
 CREATE OR REPLACE 
 FUNCTION public.tp_get_entradas_by_monthyear(
-    e_data_my text,
+    e_mes integer,
+    e_ano integer,
     e_cod_usuario integer
 )
     RETURNS SETOF json
     LANGUAGE 'plpgsql'
 AS $BODY$
+DECLARE
+    max_cod integer;
+    min_cod integer;
+    nome_mes text;
 BEGIN
-    return query 
-        select row_to_json(es) 
-        from (
-            select 
-                distinct *,
-                (   select array_to_json(array_agg(row_to_json(ent))) from 
-                    (   select *
-                        from entradas as e
-                        where exists
-                        (
-                            select 1
-                            from tempo
-                            where
-                                e.cod_tempo = t.cod_tempo
-                                and concat(case when t.mes < 10 THEN '0' ELSE '' END,t.mes,t.ano) = e_data_my
-                        )
-                    ) as ent
-                ) as entradas 
-            from tempo as t
-            where 
-                concat(case when t.mes < 10 THEN '0' ELSE '' END,t.mes,t.ano) = e_data_my
-        ) as es;  
+    max_cod := (select max(cod_tempo) from tempo where mes = e_mes and ano = e_ano);
+    min_cod := (select min(cod_tempo) from tempo where mes = e_mes and ano = e_ano);
+    nome_mes := (select mes_nome from tempo where cod_tempo = min_cod);
+
+    return query
+        select row_to_json(e) from (
+            select
+                e_mes as mes,
+                e_ano as ano,
+                nome_mes as nome_mes,
+                (
+                    select  array_to_json(array_agg(row_to_json(e))) from (
+                        select *
+                        from 
+                            entradas
+                        where
+                            cod_tempo >= min_cod
+                            and cod_tempo <= max_cod
+                            and cod_usuario = e_cod_usuario
+                    ) as e
+                ) as entradas
+        ) as e;
 END
 $BODY$;
+
+select row_to_json(e) from (
+    select *
+    from 
+        entradas
+    where
+        cod_tempo >= 3408
+        and cod_tempo <= 3438
+        and cod_usuario = 3
+) as e
 
 /*  POST /monthly-log/tp
     ::  criar uma nova entrada na task page
@@ -87,6 +102,6 @@ FUNCTION public.tp_remover_entrada(
 AS $BODY$
 BEGIN
     return query 
-        select remover_entrada(e_cod_entrada)
+        select remover_entrada(e_cod_entrada);
 END
 $BODY$;

@@ -11,7 +11,7 @@ FUNCTION public.criar_entrada(
     e_cod_tipo integer,
     e_cod_colecao integer,
     e_cod_entrada_parent integer,
-    e_cod_usuario integer,
+    e_cod_usuario integer
 )
     RETURNS SETOF json
     LANGUAGE 'plpgsql'
@@ -57,7 +57,7 @@ FUNCTION public.atualiza_entrada(
     e_descricao text,
     e_cod_prioridade integer,
     e_cod_status integer,
-    e_tipo integer
+    e_cod_tipo integer
 )
     RETURNS SETOF json
     LANGUAGE 'plpgsql'
@@ -70,7 +70,7 @@ BEGIN
         cod_status = e_cod_status,
         cod_tipo = e_cod_tipo
     where
-        cod_entrada = e_cod_entrada
+        cod_entrada = e_cod_entrada;
 
     return query 
         select row_to_json(e) 
@@ -91,7 +91,7 @@ FUNCTION public.remover_entrada(
 AS $BODY$
 BEGIN
     delete from entradas
-    where cod_entrada = e_cod_entrada
+    where cod_entrada = e_cod_entrada;
 
     return query 
         select row_to_json(e) 
