@@ -6,21 +6,6 @@ const utils = require('../utils')
 const router = new Router()
 module.exports = router
 
-/*  GET /usuarios
-    ::  consulta todos os usuário cadastrados no sistema
-    */
-router.get('/', async (req, res, next) => {
-    try {
-        const result = await db.query(`
-            select us_consulta_usuarios()
-        `, [])
-        
-        res.send(result[0].us_consulta_usuarios);
-    } catch(err) {
-        res.send({status: 1, erro: err})
-    }
-})
-
 /*  GET /monthly-log/tp/:month/:year
     ::  consulta todas entradas de task-page referentes a month/year
     */
@@ -35,7 +20,6 @@ router.get('/:month/:year', auth.authenticate, async (req, res, next) => {
         
         console.log(result)
         res.send(result[0].tp_get_entradas_by_monthyear);
-        
     } catch(err) {
         res.send({status: 1, erro: err})
     }
@@ -59,7 +43,7 @@ router.put('/', auth.authenticate, async (req, res, next) => {
         // console.log(result)
         if (result.erro) throw result.erro;
 
-        res.send({ entrada: result[0].tp_criar_entrada, status: 0 });
+        res.send({ entrada: result[0].tp_atualiza_entrada, status: 0 });
     } catch (err) {
         console.log(err);
         res.send(err);
