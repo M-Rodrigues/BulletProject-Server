@@ -21,16 +21,20 @@ router.get('/', async (req, res, next) => {
     }
 })
 
-/*  GET /usuarios/:id
-    ::  consulta apenas 1 usuario especifico pelo seu cod_usuario
+/*  GET /monthly-log/tp/:month/:year
+    ::  consulta todas entradas de task-page referentes a month/year
     */
-router.get('/:id', async (req, res, next) => {
+router.get('/:month/:year', auth.authenticate, async (req, res, next) => {
     try {
+        let month = req.params.month
+        let year = req.params.year
+        let monthYear = utils.build_data(0,month,year).substring(2,8)
+
         const result = await db.query(`
-        select us_consulta_usuario($1)
-        `, [parseInt(req.params.id)])
+            select tp_get_entradas_by_monthyear($1,$2)
+        `, [parseInt(monthYear, req.body.jwt_payload.cod_usuario)])
         
-        res.send(result[0].us_consulta_usuario);
+        res.send(result[0].tp_get_entradas_by_monthyear);
     } catch(err) {
         res.send({status: 1, erro: err})
     }
@@ -43,16 +47,12 @@ router.put('/', auth.authenticate, async (req, res, next) => {
     try {
         // atualiza dados de uma entrada
         const result = await db.query(`
-            select tp_atualiza_entrada($1,$2,$3,$4,$5,$6)
+            select tp_atualiza_entrada($1,$2,$3,$4)
         `,[
             req.body.cod_entrada, 
             req.body.descricao, 
             req.body.cod_prioridade,
-            req.body.cod_status,
-            req.body.dia,
-            req.body.mes,
-            req.body.ano,
-            req.body.data
+            req.body.cod_status
         ]);
 
         // console.log(result)
