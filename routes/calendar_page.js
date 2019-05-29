@@ -32,11 +32,12 @@ router.put('/', auth.authenticate, async (req, res, next) => {
     try {
         // atualiza dados de uma entrada
         const result = await db.query(`
-            select cp_atualiza_entrada($1,$2,$3)
+            select cp_atualiza_entrada($1,$2,$3,$4)
         `,[
             req.body.cod_entrada, 
             req.body.descricao, 
-            req.body.cod_prioridade
+            req.body.cod_prioridade,
+            req.body.cod_status
         ]);
 
         // console.log(result)

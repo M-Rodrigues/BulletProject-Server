@@ -1,8 +1,8 @@
-/*  GET /monthly-log/tp/:month/:year
-    ::  consulta todas entradas de task-page referentes a month/year
+/*  GET /monthly-log/cp/:month/:year
+    ::  consulta todas entradas de calendar-page referentes a month/year
     */
 CREATE OR REPLACE 
-FUNCTION public.tp_get_entradas_by_monthyear(
+FUNCTION public.cp_get_entradas_by_monthyear(
     e_mes integer,
     e_ano integer,
     e_cod_usuario integer
@@ -34,28 +34,18 @@ BEGIN
                             cod_tempo >= min_cod
                             and cod_tempo <= max_cod
                             and cod_usuario = e_cod_usuario
-                            and cod_colecao = 6
+                            and cod_colecao = 7
                     ) as e
                 ) as entradas
         ) as e;
 END
 $BODY$;
 
-select row_to_json(e) from (
-    select *
-    from 
-        entradas
-    where
-        cod_tempo >= 3408
-        and cod_tempo <= 3438
-        and cod_usuario = 3
-) as e
-
-/*  POST /monthly-log/tp
-    ::  criar uma nova entrada na task page
+/*  POST /monthly-log/cp
+    ::  criar uma nova entrada na calendar page
     */
 CREATE OR REPLACE 
-FUNCTION public.tp_criar_entrada(
+FUNCTION public.cp_criar_entrada(
     e_descricao text,
     e_dia integer,
     e_mes integer,
@@ -68,15 +58,15 @@ FUNCTION public.tp_criar_entrada(
 AS $BODY$
 BEGIN
     return query 
-        select criar_entrada(e_descricao, e_dia, e_mes, e_ano, e_data, 1, 1, 1, 6, null, e_cod_usuario);
+        select criar_entrada(e_descricao, e_dia, e_mes, e_ano, e_data, 1, 1, 1, 7, null, e_cod_usuario);
 END
 $BODY$;
 
-/*  PUT /monthly-log/tp
-    ::  atualiza dados de uma entrada na task page
+/*  PUT /monthly-log/cp
+    ::  atualiza dados de uma entrada na calendar page
     */
 CREATE OR REPLACE 
-FUNCTION public.tp_atualiza_entrada(
+FUNCTION public.cp_atualiza_entrada(
     e_cod_entrada integer,
     e_descricao text,
     e_cod_prioridade integer,
@@ -91,11 +81,11 @@ BEGIN
 END
 $BODY$;
 
-/*  DELETE /monthly-log/tp/:id
-    ::  remove o uma entrada da task page
+/*  DELETE /monthly-log/cp/:id
+    ::  remove o uma entrada da calendar page
     */
 CREATE OR REPLACE 
-FUNCTION public.tp_remover_entrada(
+FUNCTION public.cp_remover_entrada(
     e_cod_entrada integer
 )
     RETURNS SETOF json
