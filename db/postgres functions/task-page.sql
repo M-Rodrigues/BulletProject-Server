@@ -14,35 +14,39 @@ FUNCTION public.tp_criar_entrada(
     LANGUAGE 'plpgsql'
 AS $BODY$
 BEGIN
-    insert into entradas 
-    (descricao, cod_prioridade, cod_status, cod_tipo, cod_colecao, cod_entrada_parent, cod_usuario, data)
-    values 
-    (e_descricao, 1, 1, 1, 6, null, e_cod_usuario, e_data);
+    return select criar_entrada(e_descricao, e_dia, e_mes, e_ano, e_data, 1, 1, 1, 6, null, e_cod_usuario);
+END
+$BODY$;
 
-    update entradas
-    set
-        cod_tempo = t.cod_tempo
-    from
-        tempo as t
-    where
-        descricao = e_descricao
-        and cod_colecao = 6
-        and cod_usuario = e_cod_usuario
-        and data = e_data
-        and t.dia = e_dia
-        and t.mes = e_mes
-        and t.ano = e_ano;
+/*  PUT /monthly-log/tp
+    ::  atualiza dados de uma entrada na task page
+    */
+CREATE OR REPLACE 
+FUNCTION public.tp_atualiza_entrada(
+    e_cod_entrada integer,
+    e_descricao text,
+    e_cod_prioridade integer,
+    e_cod_status integer
+)
+    RETURNS SETOF json
+    LANGUAGE 'plpgsql'
+AS $BODY$
+BEGIN
+    return select atualiza_entrada(e_cod_entrada, e_descricao, e_cod_prioridade, e_cod_status, 1);
+END
+$BODY$;
 
-    return query 
-        select row_to_json(e) 
-        from (
-            select * 
-            from entradas
-            where 
-                descricao = e_descricao
-                and cod_colecao = 6
-                and cod_usuario = e_cod_usuario
-                and data = e_data
-        ) as e;    
+/*  DELETE /monthly-log/tp/:id
+    ::  remove o uma entrada da task page
+    */
+CREATE OR REPLACE 
+FUNCTION public.tp_remover_entrada(
+    e_cod_entrada integer
+)
+    RETURNS SETOF json
+    LANGUAGE 'plpgsql'
+AS $BODY$
+BEGIN
+    return select remover_entrada(e_cod_entrada)
 END
 $BODY$;

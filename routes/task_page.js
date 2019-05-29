@@ -1,6 +1,7 @@
 const Router = require('express-promise-router')
 const db = require('../db')
 const auth = require('../auth')
+const utils = require('../utils')
 
 const router = new Router()
 module.exports = router
@@ -21,8 +22,8 @@ router.get('/', async (req, res, next) => {
 })
 
 /*  GET /usuarios/:id
-::  consulta apenas 1 usuario especifico pelo seu cod_usuario
-*/
+    ::  consulta apenas 1 usuario especifico pelo seu cod_usuario
+    */
 router.get('/:id', async (req, res, next) => {
     try {
         const result = await db.query(`
@@ -35,12 +36,43 @@ router.get('/:id', async (req, res, next) => {
     }
 })
 
+/*  PUT /monthly-log/tp
+    ::  atualizadados de uma entrada na task-page
+    */
+router.put('/', auth.authenticate, async (req, res, next) => {
+    try {
+        // atualiza dados de uma entrada
+        const result = await db.query(`
+            select tp_atualiza_entrada($1,$2,$3,$4,$5,$6)
+        `,[
+            req.body.cod_entrada, 
+            req.body.descricao, 
+            req.body.cod_prioridade,
+            req.body.cod_status,
+            req.body.dia,
+            req.body.mes,
+            req.body.ano,
+            req.body.data
+        ]);
+
+        // console.log(result)
+        if (result.erro) throw result.erro;
+
+        res.send({ entrada: result[0].tp_criar_entrada, status: 0 });
+    } catch (err) {
+        console.log(err);
+        res.send(err);
+    }
+})
+
 /*  POST /monthly-log/tp
     ::  criar uma nova entrada na task page
     */
-router.post('/', async (req, res, next) => {
+router.post('/', auth.authenticate, async (req, res, next) => {
     try {
-        let data = build_data(req.body.dia, req.body.mes, req.body.ano)
+        let data = utils.build_data(req.body.dia, req.body.mes, req.body.ano)
+
+        console.log(data)
 
         // Cria nova entrada no banco
         const result = await db.query(`
@@ -57,14 +89,14 @@ router.post('/', async (req, res, next) => {
     }
 })
 
-/*  DELETE /usuarios/:id
-    ::  remove o cadastro de um usuário pelo seu cod_usuario
+/*  DELETE /monthly-log/tp/:id
+    ::  remove o uma entrada da task page
     */
 router.delete('/:id', auth.authenticate, async (req, res, next) => {
     try {
         console.log(req.params);
         const result = await db.query(
-            `select us_remover_usuario($1)`
+            `select tp_remover_entrada($1)`
             ,[parseInt(req.params.id)]);
 
         if (result.erro) throw result.erro;
@@ -75,20 +107,3 @@ router.delete('/:id', auth.authenticate, async (req, res, next) => {
         res.send(err);
     }
 })
-
-const build_data = (dia, mes, ano) => {
-    let data = ""
-    
-    if (!dia) data += "00"
-    else if (dia < 10) data += "0" + dia
-    else data += dia
-
-    if (!mes) data += "00"
-    else if (mes < 10) data += "0" + mes
-    else data += mes
-
-    if (!ano) data = data + "0000"
-    else data += ano
-
-    return data
-}

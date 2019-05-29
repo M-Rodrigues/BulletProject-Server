@@ -1,6 +1,7 @@
 const Router = require('express-promise-router')
 const db = require('../db')
 const auth = require('../auth')
+const utils = require('../utils')
 
 /* cod_colecao do Future Log no DB
     */
@@ -49,7 +50,7 @@ router.post('/', auth.authenticate, async (req, res, next) => {
     try {
         console.log(req.body);
 
-        let data_entr = build_data(req.body.data.dia, req.body.data.mes, req.body.data.ano)
+        let data_entr = utils.build_data(req.body.data.dia, req.body.data.mes, req.body.data.ano)
         console.log(data_entr)
         
         // Cria entrada
@@ -172,22 +173,3 @@ router.delete('/:id', auth.authenticate, async (req, res, next) => {
         res.send(err);
     }
 })
-
-
-
-const build_data = (dia, mes, ano) => {
-    let data = ""
-    
-    if (!dia) data += "00"
-    else if (dia < 10) data += "0" + dia
-    else data += dia
-
-    if (!mes) data += "00"
-    else if (mes < 10) data += "0" + mes
-    else data += mes
-
-    if (!ano) data = data + "0000"
-    else data += ano
-
-    return data
-}
