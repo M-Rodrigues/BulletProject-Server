@@ -35,6 +35,7 @@ router.get('/:month/:year', auth.authenticate, async (req, res, next) => {
         
         console.log(result)
         res.send(result[0].tp_get_entradas_by_monthyear);
+        
     } catch(err) {
         res.send({status: 1, erro: err})
     }
