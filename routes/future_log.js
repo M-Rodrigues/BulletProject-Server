@@ -48,12 +48,13 @@ router.put('/', auth.authenticate, async (req, res, next) => {
     try {
         // atualiza dados de uma entrada
         const result = await db.query(`
-            select fl_atualiza_entrada($1,$2,$3,$4)
+            select fl_atualiza_entrada($1,$2,$3,$4,$5)
         `,[
             req.body.cod_entrada, 
             req.body.descricao, 
             req.body.cod_prioridade,
-            req.body.cod_status
+            req.body.cod_status,
+            req.body.cod_tipo
         ]);
 
         // console.log(result)
@@ -72,13 +73,12 @@ router.put('/', auth.authenticate, async (req, res, next) => {
 router.post('/', auth.authenticate, async (req, res, next) => {
     try {
         let data = utils.build_data(req.body.dia, req.body.mes, req.body.ano)
-
         console.log(data)
 
         // Cria nova entrada no banco
         const result = await db.query(`
-            select fl_criar_entrada($1,$2,$3,$4,$5,$6)
-        `,[req.body.descricao, req.body.dia, req.body.mes, req.body.ano, data, req.body.jwt_payload.cod_usuario]);
+            select fl_criar_entrada($1,$2,$3,$4,$5,$6,$7)
+        `,[req.body.descricao, req.body.dia, req.body.mes, req.body.ano, data, req.body.cod_tipo, req.body.jwt_payload.cod_usuario]);
 
         // console.log(result)
         if (result.erro) throw result.erro;
