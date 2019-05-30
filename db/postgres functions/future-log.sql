@@ -10,41 +10,34 @@ FUNCTION public.fl_get_entradas_next_year (
     RETURNS SETOF json
     LANGUAGE 'plpgsql'
 AS $BODY$
-DECLARE
-    max_cod integer;
-    min_cod integer;
-    nome_mes text;
 BEGIN
-    max_cod := (select max(cod_tempo) from tempo where mes = e_mes and ano = e_ano);
-    min_cod := (select min(cod_tempo) from tempo where mes = e_mes and ano = e_ano);
-    nome_mes := (select mes_nome from tempo where cod_tempo = min_cod);
-
     return query
-        select array_to_json(array_agg(row_to_json(e))) from (
-            select
-                t.dia as dia,
-                e_mes as mes,
-                e_ano as ano,
-                nome_mes as nome_mes,
-                dia_semana_nome as dia_semana_nome,
-                (
-                    select  array_to_json(array_agg(row_to_json(e))) from (
-                        select *
-                        from 
-                            entradas
-                        where
-                            cod_tempo >= min_cod
-                            and cod_tempo <= max_cod
-                            and cod_tempo = t.cod_tempo
-                            and cod_usuario = e_cod_usuario
-                            and cod_colecao = 7
-                    ) as e
-                ) as entradas
-            from tempo as t
-            where
-                t.cod_tempo >= min_cod
-                and t.cod_tempo <= max_cod
-        ) as e;
+    select array_to_json(array_agg(row_to_json(result))) 
+    from (
+        select distinct
+            t.mes,
+            t.mes_nome,
+            t.ano,
+            (
+                select array_to_json(array_agg(row_to_json(entr))) 
+                from (
+                    select
+                        e.cod_entrada,
+                        e.descricao,
+                        e.data
+                    from entradas as e
+                    where
+                        e.cod_usuario = e_cod_usuario
+                        and e.cod_tempo <= (select max(cod_tempo) from tempo where mes = t.mes and ano = t.ano)
+                        and e.cod_tempo >= (select min(cod_tempo) from tempo where mes = t.mes and ano = t.ano)
+                ) as entr
+            )::text as entradas
+        from tempo as t
+        where
+            t.cod_tempo <= (select max(cod_tempo) from tempo where mes = e_mes and ano = e_ano+1)
+            and t.cod_tempo >= (select min(cod_tempo) from tempo where mes = e_mes and ano = e_ano)
+    ) as result;
+
 END
 $BODY$;
 
@@ -72,28 +65,31 @@ BEGIN
     return query
         select array_to_json(array_agg(row_to_json(e))) from (
             select
-                t.dia as dia,
                 e_mes as mes,
                 e_ano as ano,
                 nome_mes as nome_mes,
-                dia_semana_nome as dia_semana_nome,
                 (
                     select  array_to_json(array_agg(row_to_json(e))) from (
-                        select *
+                        select *,
+                            (
+                                select row_to_json(t)
+                                from (
+                                    select * from tempo as tt where tt.cod_tempo = ee.cod_tempo
+                                ) as t
+                            ) as full_date
                         from 
-                            entradas
+                            entradas as ee
                         where
                             cod_tempo >= min_cod
                             and cod_tempo <= max_cod
-                            and cod_tempo = t.cod_tempo
                             and cod_usuario = e_cod_usuario
-                            and cod_colecao = 7
+                            and cod_colecao = 2
+                        order by ee.cod_tempo
                     ) as e
                 ) as entradas
             from tempo as t
             where
-                t.cod_tempo >= min_cod
-                and t.cod_tempo <= max_cod
+                t.cod_tempo = min_cod
         ) as e;
 END
 $BODY$;
@@ -102,7 +98,7 @@ $BODY$;
     ::  criar uma nova entrada no future log
     */
 CREATE OR REPLACE 
-FUNCTION public.fl_criar_entrada(
+FUNCTION public.fl_criar_entrada (
     e_descricao text,
     e_dia integer,
     e_mes integer,
@@ -116,7 +112,7 @@ FUNCTION public.fl_criar_entrada(
 AS $BODY$
 BEGIN
     return query 
-        select criar_entrada(e_descricao, e_dia, e_mes, e_ano, e_data, 1, 1, e_cod_tipo, 7, null, e_cod_usuario);
+        select criar_entrada(e_descricao, e_dia, e_mes, e_ano, e_data, 1, 1, e_cod_tipo, 2, null, e_cod_usuario);
 END
 $BODY$;
 

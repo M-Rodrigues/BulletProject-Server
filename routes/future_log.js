@@ -9,14 +9,20 @@ module.exports = router
 /*  GET /future-log/full-year
     ::  consulta todas entradas de future log dos próximos 12 meses
     */
-router.get('full-year', auth.authenticate, async (req, res, next) => {
+router.get('/full-year/:month/:year', async (req, res, next) => {
     try {
+        let m = parseInt(req.params.month)
+        let y = parseInt(req.params.year)
+
+        console.log("on my function")
         const result = await db.query(`
-            select fl_get_entradas_next_year($1,$2,$3)
-        `, [parseInt(month), parseInt(year), req.body.jwt_payload.cod_usuario])
+            select fl_get_entradas_next_year($1,$2,$3,$4)
+        `, [m,y,m,y+1,req.body.jwt_payload.cod_usuario])
         
         console.log(result)
-        res.send({ data: result[0].fl_get_entradas_next_year, status: 0 });
+        
+        // res.send({ data: result[0].fl_get_entradas_next_year, status: 0 });
+        res.send(result);
     } catch(err) {
         res.send({status: 1, erro: err})
     }
@@ -34,7 +40,7 @@ router.get('/:month/:year', auth.authenticate, async (req, res, next) => {
             select fl_get_entradas_by_monthyear($1,$2,$3)
         `, [parseInt(month), parseInt(year), req.body.jwt_payload.cod_usuario])
         
-        console.log(result)
+        // console.log(result)
         res.send({ status: 0, data: result[0].fl_get_entradas_by_monthyear });
     } catch(err) {
         res.send({status: 1, erro: err})
@@ -73,7 +79,7 @@ router.put('/', auth.authenticate, async (req, res, next) => {
 router.post('/', auth.authenticate, async (req, res, next) => {
     try {
         let data = utils.build_data(req.body.dia, req.body.mes, req.body.ano)
-        console.log(data)
+        console.log(req.body)
 
         // Cria nova entrada no banco
         const result = await db.query(`
@@ -82,7 +88,7 @@ router.post('/', auth.authenticate, async (req, res, next) => {
 
         // console.log(result)
         if (result.erro) throw result.erro;
-
+        
         res.send({ entrada: result[0].fl_criar_entrada, status: 0 });
     } catch (err) {
         console.log(err);

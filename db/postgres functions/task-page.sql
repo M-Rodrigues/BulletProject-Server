@@ -2,7 +2,7 @@
     ::  consulta todas entradas de task-page referentes a month/year
     */
 CREATE OR REPLACE 
-FUNCTION public.tp_get_entradas_by_monthyear(
+FUNCTION public.tp_get_entradas_by_monthyear (
     e_mes integer,
     e_ano integer,
     e_cod_usuario integer
