@@ -12,31 +12,41 @@ FUNCTION public.fl_get_entradas_next_year (
 AS $BODY$
 BEGIN
     return query
-    select array_to_json(array_agg(row_to_json(result))) 
+    
+    select array_to_json(array_agg(row_to_json(ans))) 
     from (
-        select distinct
-            t.mes,
-            t.mes_nome,
-            t.ano,
-            (
-                select array_to_json(array_agg(row_to_json(entr))) 
+        SELECT DISTINCT ON (doc) doc
+        FROM  (
+            SELECT (
+                select array_to_json(array_agg(row_to_json(result))) 
                 from (
                     select
-                        e.cod_entrada,
-                        e.descricao,
-                        e.data
-                    from entradas as e
+                        t.mes,
+                        t.mes_nome,
+                        t.ano,
+                        (
+                            select array_to_json(array_agg(row_to_json(entr))) 
+                            from (
+                                select
+                                    e.cod_entrada,
+                                    e.descricao,
+                                    e.data
+                                from entradas as e
+                                where
+                                    e.cod_usuario = e_cod_usuario
+                                    and e.cod_tempo <= (select max(cod_tempo) from tempo where mes = t.mes and ano = t.ano)
+                                    and e.cod_tempo >= (select min(cod_tempo) from tempo where mes = t.mes and ano = t.ano)
+                            ) as entr
+                        ) as entradas
+                    from tempo as t
                     where
-                        e.cod_usuario = e_cod_usuario
-                        and e.cod_tempo <= (select max(cod_tempo) from tempo where mes = t.mes and ano = t.ano)
-                        and e.cod_tempo >= (select min(cod_tempo) from tempo where mes = t.mes and ano = t.ano)
-                ) as entr
-            )::text as entradas
-        from tempo as t
-        where
-            t.cod_tempo <= (select max(cod_tempo) from tempo where mes = e_mes and ano = e_ano+1)
-            and t.cod_tempo >= (select min(cod_tempo) from tempo where mes = e_mes and ano = e_ano)
-    ) as result;
+                        t.cod_tempo <= (select max(cod_tempo) from tempo where mes = e_mes and ano = e_ano+1)
+                        and t.cod_tempo >= (select min(cod_tempo) from tempo where mes = e_mes and ano = e_ano)
+                ) as result
+            )::jsonb AS j
+        ) t
+        , jsonb_array_elements(t.j) WITH ORDINALITY t1(doc)
+    ) as ans;
 
 END
 $BODY$;
