@@ -55,3 +55,22 @@ BEGIN
         select remover_entrada(e_cod_entrada);
 END
 $BODY$;
+
+
+/*  GET /daily-log/:id
+    ::  consulta 1 entrada do daily-log
+    */
+CREATE OR REPLACE 
+FUNCTION public.dl_get_entrada(id integer)
+    RETURNS SETOF json
+    LANGUAGE 'plpgsql'
+AS $BODY$
+
+BEGIN
+	RETURN QUERY 
+        SELECT row_to_json(u) 
+        FROM (
+            select * from entradas where e_cod_entrada = id
+        ) as u;
+END
+$BODY$;

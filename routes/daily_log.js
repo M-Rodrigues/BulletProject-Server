@@ -6,42 +6,74 @@ const utils = require('../utils')
 const router = new Router()
 module.exports = router
 
-/*  GET /future-log/full-year
-    ::  consulta todas entradas de future log dos próximos 12 meses
+/*  GET /daily-log/:id
+    ::  consulta 1 entrada do daily-log
     */
-router.get('/full-year/:month/:year', async (req, res, next) => {
+router.get('/:id', async (req, res, next) => {
     try {
-        let m = parseInt(req.params.month)
-        let y = parseInt(req.params.year)
-
-        console.log("on my function")
         const result = await db.query(`
-            select fl_get_entradas_next_year($1,$2,$3,$4)
-        `, [m,y,m,y+1,req.body.jwt_payload.cod_usuario])
+            select dl_get_entrada($1)
+        `, [req.params.id])
         
         console.log(result)
         
-        // res.send({ data: result[0].fl_get_entradas_next_year, status: 0 });
-        res.send(result);
+        res.send({ data: result[0].dl_get_entrada, status: 0 });
+        // res.send(result);
     } catch(err) {
         res.send({status: 1, erro: err})
     }
 })
 
-/*  GET /future-log/:month/:year
-    ::  consulta todas entradas de future log referentes a month/year
+/*  GET /daily-log/last-week
+    ::  consulta as entradas de daily-log dentro de 1 semana
     */
-router.get('/:month/:year', auth.authenticate, async (req, res, next) => {
+router.get('/last-week', async (req, res, next) => {
     try {
-        let month = req.params.month
-        let year = req.params.year
+        const result = await db.query(`
+            select dl_get_entradas_last_week($1,$2,$3,$4)
+        `, [req.body.dia, req.body.mes, req.body.ano, req.body.jwt_payload.cod_usuario])
+        
+        console.log(result)
+        
+        res.send({ data: result[0].dl_get_entradas_last_week, status: 0 });
+        // res.send(result);
+    } catch(err) {
+        res.send({status: 1, erro: err})
+    }
+})
+
+// TODO
+/*  GET /daily-log/last-month
+    ::  consulta todas entradas de daily-log dentro de 1 mes
+    */
+router.get('/last-month', auth.authenticate, async (req, res, next) => {
+    try {
+        let month = req.body.month
+        let year = req.body.year
 
         const result = await db.query(`
-            select fl_get_entradas_by_monthyear($1,$2,$3)
+            select fl_get_entradas_last_month($1,$2,$3)
         `, [parseInt(month), parseInt(year), req.body.jwt_payload.cod_usuario])
         
         // console.log(result)
-        res.send({ status: 0, data: result[0].fl_get_entradas_by_monthyear });
+        res.send({ status: 0, data: result[0].fl_get_entradas_last_month });
+    } catch(err) {
+        res.send({status: 1, erro: err})
+    }
+})
+
+// TODO
+/*  GET /daily-log
+    ::  consulta todas entradas de daily-log do usuario
+    */
+router.get('/', auth.authenticate, async (req, res, next) => {
+    try {
+        const result = await db.query(`
+            select fl_get_entradas($1,$2,$3)
+        `, [req.body.jwt_payload.cod_usuario])
+        
+        // console.log(result)
+        res.send({ status: 0, data: result[0].fl_get_entradas });
     } catch(err) {
         res.send({status: 1, erro: err})
     }
