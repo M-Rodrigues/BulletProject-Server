@@ -141,7 +141,7 @@ router.delete('/:id', auth.authenticate, async (req, res, next) => {
 
         if (result.erro) throw result.erro;
 
-        res.send({staus: 0, message: 'sucesso'});
+        res.send({status: 0, message: 'sucesso'});
     } catch (err) {
         console.log(err);
         res.send({status: 1, erro:err });
