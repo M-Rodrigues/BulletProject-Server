@@ -28,9 +28,12 @@ BEGIN
                             select array_to_json(array_agg(row_to_json(entr))) 
                             from (
                                 select
-                                    e.cod_entrada,
-                                    e.descricao,
-                                    e.data
+                                    e.*,
+                                    (
+                                        select row_to_json(t) from (
+                                            select * from tempo as tt where tt.cod_tempo = e.cod_tempo
+                                        ) as t
+                                    ) as full_date
                                 from entradas as e
                                 where
                                     e.cod_usuario = e_cod_usuario
