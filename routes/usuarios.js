@@ -52,7 +52,7 @@ router.post('/', async (req, res, next) => {
             select us_criar_usuario($1,$2,$3,$4,$5,$6,$7)
         `,[user.nome, user.email, hashAns, hashPsw, user.dia_nasc, user.mes_nasc, user.ano_nasc]);
 
-        // console.log(result)
+        console.log(result)
         
         if (result.erro) throw result.erro;
 
@@ -62,6 +62,7 @@ router.post('/', async (req, res, next) => {
         res.send(err);
     }
 })
+
 
 /*  DELETE /usuarios/:id
     ::  remove o cadastro de um usuário pelo seu cod_usuario

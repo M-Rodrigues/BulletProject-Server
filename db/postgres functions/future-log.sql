@@ -34,6 +34,7 @@ BEGIN
                                 from entradas as e
                                 where
                                     e.cod_usuario = e_cod_usuario
+                                    and e.cod_colecao = 2
                                     and e.cod_tempo <= (select max(cod_tempo) from tempo where mes = t.mes and ano = t.ano)
                                     and e.cod_tempo >= (select min(cod_tempo) from tempo where mes = t.mes and ano = t.ano)
                             ) as entr
