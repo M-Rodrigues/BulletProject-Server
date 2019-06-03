@@ -14,7 +14,8 @@ app.use((req, res, next) => {               // MIDDLEWARE DE LOGS
 app.use((req, res, next) => {               // MIDDLEWARE PARA CORS
     res.header("Access-Control-Allow-Origin", "*");
     res.header("Access-Control-Allow-Methods", "PUT, GET, OPTIONS, POST, PATCH, DELETE")
-    res.header("Access-Control-Allow-Headers", "Origin, X-Requested-With, Content-Type, Accept");
+    // res.header("Access-Control-Allow-Headers", "Origin, X-Requested-With, Content-Type, Accept");
+    res.header("Access-Control-Allow-Headers", "*");
     next();
 });
 app.use(bodyParser.json());                 // BODY PARSER
